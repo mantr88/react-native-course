@@ -1,68 +1,61 @@
-import { Button, StyleSheet, Text, TextInput, View,ScrollView } from 'react-native';
-import React, { useState } from 'react';
+import { StyleSheet, View, FlatList } from 'react-native'
+import React, { useState } from 'react'
+
+import GoalText from './components/GoalText'
+import GoalInput from './components/GoalInput'
+
 export default function App() {
-  const [goalText, setGoalText] = useState('')
   const [goalList, setGoalList] = useState([])
 
-  const onInputHandler = (enteredText) => { 
-    setGoalText(enteredText);
+  const onAddGoalHandler = goalText => {
+    setGoalList(prevState => [
+      ...prevState,
+      { text: goalText, id: Math.random().toString() }
+    ])
   }
 
-  const onAddGoalHandler = () => { 
-  setGoalList(prevState=>[...prevState, goalText])
+  const onDeleteGoalHandler = id => {
+    console.log('Delete')
+    setGoalList(prevState => {
+      return prevState.filter(goal => goal.id !== id)
+    })
   }
+
   return (
     <View style={styles.appContainer}>
-      <View style={styles.inputContainer}>
-        <TextInput style={styles.inputText} placeholder='Your cource goal!' onChangeText={onInputHandler}/>
-        <Button title='Add Goal' onPress={onAddGoalHandler} />
-      </View>
+      <GoalInput addGoalHandler={onAddGoalHandler} />
       <View style={styles.goalsContainer}>
-        <ScrollView alwaysBounceVertical={false}>
-          {goalList.length!==0? goalList.map((goal,index) => <View key={index} style={styles.goalItem}>
-            <Text style={styles.goalText}>{goal}</Text>
-          </View>): <Text>No goals yet!</Text>}
-        </ScrollView>
+        <FlatList
+          data={goalList}
+          renderItem={itemData => {
+            return (
+              <GoalText
+                text={itemData.item.text}
+                id={itemData.item.id}
+                onDeleteGoalHandler={onDeleteGoalHandler}
+              />
+            )
+          }}
+          keyExtractor={(item, index) => {
+            return item.id
+          }}
+          alwaysBounceVertical={false}
+        />
       </View>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   appContainer: {
     flex: 1,
     padding: 50,
-    paddingHorizontal:16,
+    paddingHorizontal: 16
     // backgroundColor: '#fff',
     // alignItems: 'center',
     // justifyContent: 'center',
   },
-  inputContainer: {
-    flex:1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: '#cccccc',
-  },
-  inputText: {
-    width: '70%',
-    marginRight:8,
-    borderColor: '#cccccc',
-    borderWidth: 1,
-    padding: 8,
-  },
   goalsContainer: {
-    flex:4
-  },
-  goalItem: {
-    padding: 8,
-    margin: 8,
-    backgroundColor: '#5e0acc',
-    borderRadius: 8,
-  },
-  goalText: {
-    color: 'white',
+    flex: 4
   }
-});
+})
